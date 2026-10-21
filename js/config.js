@@ -10,11 +10,11 @@
  */
 const CONFIG = Object.freeze({
   // Fecha y hora del evento (hora de Lima). La cuenta regresiva apunta aquí.
-  fechaEvento: "2026-12-09T19:00:00-05:00",
+  fechaEvento: "2026-12-01T18:00:00-05:00",
 
   // Último momento para confirmar asistencia (hora de Lima).
-  // Debe coincidir con FECHA_LIMITE en apps-script/Code.gs.
-  fechaLimiteFormulario: "2026-12-06T23:59:59-05:00",
+  // Después de esta fecha se oculta el botón del formulario. Cierra también el formulario externo en esa fecha.
+  fechaLimiteFormulario: "2026-11-26T23:59:59-05:00",
 
   // Textos de la portada.
   titulo: "Noche de Gala",
@@ -36,18 +36,18 @@ const CONFIG = Object.freeze({
   // Itinerario de la noche: cada bloque tiene hora, título y descripción breve.
   itinerario: [
     // EJEMPLO — reemplazar
-    { hora: "7:00 p. m.", titulo: "Recepción", descripcion: "Bienvenida y registro de invitados." },
+    { hora: "6:00 p. m.", titulo: "Recepción", descripcion: "Bienvenida y registro de invitados." },
     // EJEMPLO — reemplazar
-    { hora: "7:30 p. m.", titulo: "Palabras de apertura", descripcion: "Mensaje de la gerencia." },
+    { hora: "6:30 p. m.", titulo: "Palabras de apertura", descripcion: "Mensaje de la gerencia." },
     // EJEMPLO — reemplazar
-    { hora: "8:00 p. m.", titulo: "Reconocimientos", descripcion: "Entrega de distinciones por 5, 10, 15, 20, 25 y 30 años." },
+    { hora: "7:00 p. m.", titulo: "Reconocimientos", descripcion: "Entrega de distinciones por 5, 10, 15, 20, 25 y 30 años." },
     // EJEMPLO — reemplazar
-    { hora: "9:00 p. m.", titulo: "Cena", descripcion: "Cena de gala para todos los asistentes." },
+    { hora: "8:00 p. m.", titulo: "Cena", descripcion: "Cena de gala para todos los asistentes." },
     // EJEMPLO — reemplazar
-    { hora: "10:00 p. m.", titulo: "Brindis y celebración", descripcion: "Música y cierre de la noche." }
+    { hora: "9:00 p. m.", titulo: "Brindis y celebración", descripcion: "Música y cierre de la noche." }
   ],
 
-  // URL de la aplicación web de Google Apps Script (ver README.md).
-  // Vacío = MODO DEMO: el formulario simula un envío exitoso y no guarda nada.
-  APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbxDzxceps6OtRhaWSXakc5vAhNYrMP10NggfeDIXrpy7P6pcRYtrbdMhYSyoYmKWS3S/exec"
+  // Link del formulario de confirmación (se abre en una pestaña nueva). Debe empezar con https://
+  // Vacío = el botón "Confirmar asistencia" no se muestra.
+  formularioUrl: ""
 });

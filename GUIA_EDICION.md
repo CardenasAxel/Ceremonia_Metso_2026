@@ -4,14 +4,13 @@ Esta guía es para cualquier persona o asistente de IA (ChatGPT, Claude, Copilot
 
 ## Qué es este proyecto
 
-Una página web estática (HTML + CSS + JavaScript, sin instalar nada) que funciona como invitación digital. Se publica en GitHub Pages. Las confirmaciones se guardan en una hoja de Google Sheets a través de Google Apps Script.
+Una página web estática (HTML + CSS + JavaScript, sin instalar nada) que funciona como invitación digital. Se publica en GitHub Pages. La confirmación de asistencia se hace en un formulario externo de la empresa: la página solo muestra el botón que lo abre.
 
 ```
 index.html          Estructura y textos fijos de la página
 css/styles.css      Diseño (colores, tipografías, tamaños)
 js/config.js        ← DATOS EDITABLES (lo único que se toca normalmente)
-js/main.js          Lógica (cuenta regresiva, formulario, itinerario)
-apps-script/Code.gs Backend que guarda las respuestas en Google Sheets
+js/main.js          Lógica (cuenta regresiva, botón del formulario, itinerario)
 assets/img/         Imágenes optimizadas (WebP + PNG)
 assets/fonts/       Tipografías autoalojadas
 ```
@@ -30,8 +29,8 @@ assets/fonts/       Tipografías autoalojadas
 
 ```js
 const CONFIG = Object.freeze({
-  fechaEvento: "2026-12-09T19:00:00-05:00",
-  fechaLimiteFormulario: "2026-12-06T23:59:59-05:00",
+  fechaEvento: "2026-12-01T18:00:00-05:00",
+  fechaLimiteFormulario: "2026-11-26T23:59:59-05:00",
   titulo: "Noche de Gala",
   subtitulo: "Ceremonia de Años de Servicio",
   mensajeDiaEvento: {
@@ -44,15 +43,15 @@ const CONFIG = Object.freeze({
     mapsUrl: "https://maps.app.goo.gl/eHSjA9HLxhH4Ji5S8"
   },
   itinerario: [
-    { hora: "7:00 p. m.", titulo: "Recepción", descripcion: "Bienvenida y registro de invitados." },
+    { hora: "6:00 p. m.", titulo: "Recepción", descripcion: "Bienvenida y registro de invitados." },
     // …más bloques…
   ],
-  APPS_SCRIPT_URL: ""
+  formularioUrl: "https://forms.office.com/…"
 });
 ```
 
 - Las fechas van en formato `AAAA-MM-DDTHH:MM:SS-05:00`. El `-05:00` es la hora de Lima: **no lo quites**.
-- La fecha y la hora que se ven en la página ("Miércoles 9 de diciembre de 2026", "7:00 p. m.") y el texto del plazo ("domingo 6 de diciembre") se calculan solos a partir de estas fechas.
+- La fecha y la hora que se ven en la página ("Martes 1 de diciembre de 2026", "6:00 p. m.") y el texto del plazo ("jueves 26 de noviembre") se calculan solos a partir de estas fechas.
 
 ## Ejemplos de pedidos y el fragmento exacto que cambia
 
@@ -88,20 +87,16 @@ Borra la línea completa (y su comentario `// EJEMPLO` si lo tiene):
 ### 4. "El evento ahora empieza a las 7:30 p. m."
 
 ```js
-  fechaEvento: "2026-12-09T19:30:00-05:00",
+  fechaEvento: "2026-12-01T19:30:00-05:00",
 ```
 La cuenta regresiva y la hora mostrada se actualizan solas. Revisa también que el itinerario sea coherente.
 
-### 5. "Amplía el plazo de confirmación hasta el lunes 7 de diciembre"
+### 5. "Amplía el plazo de confirmación hasta el viernes 27 de noviembre"
 
-En `js/config.js`:
 ```js
-  fechaLimiteFormulario: "2026-12-07T23:59:59-05:00",
+  fechaLimiteFormulario: "2026-11-27T23:59:59-05:00",
 ```
-**Y también** en `apps-script/Code.gs`. Después hay que volver a implementar el script (ver README, "Actualizar el script"):
-```js
-var FECHA_LIMITE = new Date('2026-12-07T23:59:59-05:00');
-```
+Después de esa fecha la página oculta el botón y muestra "El plazo de confirmación cerró…". Ajusta también la fecha de cierre en el formulario externo.
 
 ### 6. "Cambia el título de la portada a 'Gala de Reconocimiento'"
 
@@ -110,13 +105,12 @@ var FECHA_LIMITE = new Date('2026-12-07T23:59:59-05:00');
 ```
 Opcional: cambia también el mismo texto dentro de `<h1 … data-cfg="titulo">` en `index.html` (es el texto de respaldo cuando JavaScript está desactivado).
 
-### 7. "Conecta el formulario con la hoja de Google"
+### 7. "Pon el link del formulario de confirmación"
 
-Pega la URL de la aplicación web de Apps Script (termina en `/exec`):
 ```js
-  APPS_SCRIPT_URL: "https://script.google.com/macros/s/XXXXXXXX/exec"
+  formularioUrl: "https://forms.office.com/r/XXXXXXXX"
 ```
-Mientras esté vacío (`""`), el formulario funciona en **modo demo**: simula el envío y no guarda nada.
+Debe empezar con `https://`. Mientras esté vacío (`""`), el botón "Confirmar asistencia" no se muestra.
 
 ### 8. "Cambia el mensaje del día del evento"
 
@@ -134,7 +128,7 @@ Solo si el pedido lo dice de forma explícita (por ejemplo: "cambia el código d
     <p class="dress">Elegante formal</p>
 ```
 ```html
-        <p>Salida a las <strong>17:00 h</strong> desde Cronos, El Polo.</p>
+        <p>Estacionamiento <strong>limitado</strong> en el local, compartido con clientes del restaurante.</p>
 ```
 
 ## Cómo verificar después de editar

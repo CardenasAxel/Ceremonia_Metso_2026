@@ -37,7 +37,6 @@
   --text: #e9e4da;
   --muted: #b3ab9e;
   --line: rgba(201, 163, 107, 0.4);
-  --error: #ffab9c;
   --serif: "Cormorant Garamond", Georgia, "Times New Roman", serif;
   --sans: "Montserrat", "Segoe UI", Arial, sans-serif;
   color-scheme: dark;
@@ -93,7 +92,7 @@ strong { font-weight: 500; color: var(--gold-light); }
   text-transform: uppercase;
   color: var(--gold-mid);
 }
-h1, h2, .title, .script, .event-day-title, .message-title {
+h1, h2, .title, .script, .event-day-title {
   font-family: var(--serif);
   font-style: italic;
   font-weight: 500;
@@ -134,7 +133,7 @@ h3 { margin: .75rem 0 .25rem; font: italic 500 1.5rem/1.2 var(--serif); color: v
   background: radial-gradient(circle at 50% 30%, rgba(242, 217, 166, .12), transparent 70%), var(--surface);
   box-shadow: 0 0 18px rgba(201, 163, 107, .22);
 }
-.ic svg, .badge svg, .note svg, .privacy svg, .btn-ic {
+.ic svg, .badge svg, .btn-ic {
   fill: none; stroke: var(--gold-light); stroke-width: 1.6;
   stroke-linecap: round; stroke-linejoin: round;
 }
@@ -307,57 +306,12 @@ main { container-type: inline-size; }
 .timeline h3 { margin: .1rem 0 .15rem; }
 .timeline p { margin: 0; color: var(--muted); font-size: .95rem; }
 
-/* ---------- 7. Formulario ---------- */
-.form { text-align: left; }
-.field { margin: 0 0 1.5rem; padding: 0; border: 0; min-width: 0; }
-.field > label, legend {
-  display: block; margin-bottom: .5rem; padding: 0;
-  font-weight: 500; font-size: .95rem; color: var(--gold-light);
-}
-input[type="text"], textarea {
-  width: 100%; padding: .85rem 1rem;
-  border: 1px solid var(--line); border-radius: 10px;
-  background: var(--surface); color: var(--text);
-  font: 400 1rem/1.4 var(--sans);
-}
-textarea { resize: vertical; min-height: 6rem; }
-input[type="text"]:focus-visible, textarea:focus-visible { border-color: var(--gold); outline-offset: 2px; }
-[aria-invalid="true"] { border-color: var(--error) !important; }
-
-input[type="radio"], input[type="checkbox"] {
-  width: 1.25rem; height: 1.25rem; margin: 0; flex: none; accent-color: var(--gold-mid);
-}
-.choices { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
-.choice {
-  display: flex; align-items: center; gap: .65rem;
-  min-height: 48px; padding: .6rem 1rem;
-  border: 1px solid var(--line); border-radius: 10px;
-  background: var(--surface); cursor: pointer;
-}
-.choice:has(input:checked) { border-color: var(--gold); background: rgba(235, 199, 137, .1); color: var(--gold-light); }
-.choice:has(input:focus-visible) { outline: 2px solid var(--gold-light); outline-offset: 3px; }
-.choice input:focus-visible { outline: none; }
-.field > .check { display: flex; align-items: flex-start; gap: .75rem; font-weight: 300; color: var(--text); cursor: pointer; }
-.check input { margin-top: .15rem; }
-
+/* ---------- 7. Confirmación ---------- */
 .note {
   display: flex; gap: .5rem; align-items: flex-start;
   margin: .75rem 0 0; font-size: .85rem; color: var(--muted); font-style: italic;
 }
-.note svg { width: 20px; height: 20px; flex: none; margin-top: .1rem; }
-.err { margin: .5rem 0 0; color: var(--error); font-size: .875rem; font-weight: 400; }
-.err::before { content: "⚠ "; }
-
-/* Campo trampa: fuera de la vista, pero no display:none para que lo llenen los bots */
-.hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
-
-.form .btn { width: 100%; margin-top: .5rem; }
-.form-status { min-height: 1.5rem; margin: 1rem 0 0; text-align: center; font-size: .95rem; }
-.form-status.is-error { color: var(--error); }
-
 .message { padding: 2rem 1.25rem; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
-.message:focus { outline: none; }
-.message-title { margin: 1rem 0 .25rem; font-size: 2rem; line-height: 1.2; }
 .message p:last-child { margin-bottom: 0; }
 
 /* ---------- 8. Pie de página ---------- */
@@ -371,8 +325,6 @@ input[type="radio"], input[type="checkbox"] {
 .footer > :not(.fx) { position: relative; z-index: 1; }
 .fx-corner-rock { left: 0; bottom: 0; width: var(--rw); }
 .fx-corner-curve { left: 0; bottom: 0; width: calc(var(--rw) * .62); }
-.privacy { display: flex; gap: .5rem; align-items: flex-start; justify-content: center; max-width: 46ch; margin: 1.5rem auto 0; text-align: left; }
-.privacy svg { width: 18px; height: 18px; flex: none; margin-top: .15rem; }
 
 /* ---------- Pantallas más grandes ---------- */
 @media (min-width: 768px) {
