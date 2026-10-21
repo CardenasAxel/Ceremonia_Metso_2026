@@ -378,7 +378,10 @@ input[type="radio"], input[type="checkbox"] {
 @media (min-width: 768px) {
   .section { padding: 5.5rem 2rem; }
   .facts { grid-template-columns: repeat(3, 1fr); gap: 1rem; }
-  .cards { grid-template-columns: 1fr 1fr; }
+  /* ¿Cómo llegar?: tarjetas apiladas a todo el ancho, ícono a la izquierda y contenido a la derecha */
+  .card { display: grid; grid-template-columns: 64px 1fr; column-gap: 1.5rem; align-items: start; padding: 1.75rem 2rem; text-align: left; }
+  .card > * { grid-column: 2; justify-self: start; }
+  .card > .ic { grid-column: 1; grid-row: 1 / span 9; margin: 0; }
   .fx-crystal { top: 1.5rem; right: 5vw; }
   .deco { --side: calc((100% - 100vw) / 2 + 3vw); --side: calc((100% - 100cqw) / 2 + 3cqw); top: 30%; height: 120px; }
   .section-side { padding-inline: 2rem; }
