@@ -13,7 +13,7 @@ const CONFIG = Object.freeze({
   fechaEvento: "2026-12-01T18:00:00-05:00",
 
   // Último momento para confirmar asistencia (hora de Lima).
-  // Después de esta fecha se oculta el botón del formulario. Cierra también el formulario externo en esa fecha.
+  // Debe coincidir con la fecha de la condición del flujo de Power Automate (ver GUIA_POWER_AUTOMATE.md, paso 3.3).
   fechaLimiteFormulario: "2026-11-26T23:59:59-05:00",
 
   // Textos de la portada.
@@ -47,7 +47,7 @@ const CONFIG = Object.freeze({
     { hora: "9:00 p. m.", titulo: "Brindis y celebración", descripcion: "Música y cierre de la noche." }
   ],
 
-  // Link del formulario de confirmación (se abre en una pestaña nueva). Debe empezar con https://
-  // Vacío = el botón "Confirmar asistencia" no se muestra.
-  formularioUrl: ""
+  // URL "HTTP POST" del flujo de Power Automate que guarda las respuestas en Excel (ver GUIA_POWER_AUTOMATE.md).
+  // Vacío = MODO DEMO: el formulario simula un envío exitoso y no guarda nada.
+  FLUJO_URL: ""
 });

@@ -4,13 +4,13 @@ Esta guía es para cualquier persona o asistente de IA (ChatGPT, Claude, Copilot
 
 ## Qué es este proyecto
 
-Una página web estática (HTML + CSS + JavaScript, sin instalar nada) que funciona como invitación digital. Se publica en GitHub Pages. La confirmación de asistencia se hace en un formulario externo de la empresa: la página solo muestra el botón que lo abre.
+Una página web estática (HTML + CSS + JavaScript, sin instalar nada) que funciona como invitación digital. Se publica en GitHub Pages. Las confirmaciones se guardan en un Excel de Microsoft 365 a través de un flujo de Power Automate (ver GUIA_POWER_AUTOMATE.md).
 
 ```
 index.html          Estructura y textos fijos de la página
 css/styles.css      Diseño (colores, tipografías, tamaños)
 js/config.js        ← DATOS EDITABLES (lo único que se toca normalmente)
-js/main.js          Lógica (cuenta regresiva, botón del formulario, itinerario)
+js/main.js          Lógica (cuenta regresiva, formulario, itinerario)
 assets/img/         Imágenes optimizadas (WebP + PNG)
 assets/fonts/       Tipografías autoalojadas
 ```
@@ -46,7 +46,7 @@ const CONFIG = Object.freeze({
     { hora: "6:00 p. m.", titulo: "Recepción", descripcion: "Bienvenida y registro de invitados." },
     // …más bloques…
   ],
-  formularioUrl: "https://forms.office.com/…"
+  FLUJO_URL: ""
 });
 ```
 
@@ -96,7 +96,7 @@ La cuenta regresiva y la hora mostrada se actualizan solas. Revisa también que 
 ```js
   fechaLimiteFormulario: "2026-11-27T23:59:59-05:00",
 ```
-Después de esa fecha la página oculta el botón y muestra "El plazo de confirmación cerró…". Ajusta también la fecha de cierre en el formulario externo.
+**Y también** en la condición del flujo de Power Automate: cambia `2026-11-27T05:00:00Z` por `2026-11-28T05:00:00Z` (ver GUIA_POWER_AUTOMATE.md, paso 3).
 
 ### 6. "Cambia el título de la portada a 'Gala de Reconocimiento'"
 
@@ -105,12 +105,13 @@ Después de esa fecha la página oculta el botón y muestra "El plazo de confirm
 ```
 Opcional: cambia también el mismo texto dentro de `<h1 … data-cfg="titulo">` en `index.html` (es el texto de respaldo cuando JavaScript está desactivado).
 
-### 7. "Pon el link del formulario de confirmación"
+### 7. "Conecta el formulario con el Excel"
 
+Pega la URL "HTTP POST" del flujo de Power Automate (ver GUIA_POWER_AUTOMATE.md):
 ```js
-  formularioUrl: "https://forms.office.com/r/XXXXXXXX"
+  FLUJO_URL: "https://xxxxxxxx.xx.environment.api.powerplatform.com:443/powerautomate/..."
 ```
-Debe empezar con `https://`. Mientras esté vacío (`""`), el botón "Confirmar asistencia" no se muestra.
+Mientras esté vacío (`""`), el formulario funciona en **modo demo**: simula el envío y no guarda nada.
 
 ### 8. "Cambia el mensaje del día del evento"
 

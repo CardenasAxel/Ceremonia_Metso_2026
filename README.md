@@ -1,6 +1,8 @@
 # Invitación digital · Ceremonia de Años de Servicio Metso 2026
 
-Página web estática para invitar a la ceremonia. La confirmación de asistencia se hace en un formulario externo de la empresa; la página solo tiene el botón que lo abre (link en `formularioUrl` de `js/config.js`).
+Página web estática para invitar a la ceremonia. Las confirmaciones de asistencia se llenan en la misma página y se guardan en un Excel de Microsoft 365 mediante un flujo de Power Automate.
+
+- **Para conectar el formulario con Excel**: sigue [GUIA_POWER_AUTOMATE.md](GUIA_POWER_AUTOMATE.md).
 
 - **Para editar contenido** (itinerario, fechas, textos): lee [GUIA_EDICION.md](GUIA_EDICION.md).
 - **Para trabajar con Claude Code**: el proyecto incluye [CLAUDE.md](CLAUDE.md).
@@ -18,7 +20,7 @@ Esta guía está pensada para alguien sin experiencia técnica. Sigue los pasos 
    ```
 3. Abre `http://localhost:8080` en el navegador.
 
-Mientras `formularioUrl` esté vacío en `js/config.js`, el botón "Confirmar asistencia" no se muestra.
+Mientras `FLUJO_URL` esté vacío en `js/config.js`, el formulario funciona en **modo demo**: simula el envío y no guarda nada.
 
 ---
 
@@ -47,7 +49,7 @@ Mientras `formularioUrl` esté vacío en `js/config.js`, el botón "Confirmar as
    ```html
    <meta property="og:image" content="https://TU-USUARIO.github.io/anios-servicio-2026/assets/img/og-image.jpg">
    ```
-6. Abre la URL final en el celular y comprueba que el botón "Confirmar asistencia" abre el formulario.
+6. Abre la URL final en el celular, envía una confirmación de prueba y comprueba que aparece en el Excel. Luego bórrala.
 
 ---
 
@@ -65,8 +67,9 @@ Prueba el QR con 2 o 3 celulares distintos antes de enviar el afiche. Incluye ta
 ## 3. Checklist de seguridad
 
 - [ ] **Verificación en dos pasos (2FA)** activada en la cuenta de GitHub (*Settings → Password and authentication*).
-- [ ] **Nunca** se suben al repositorio exportaciones del formulario (CSV/Excel), capturas de respuestas, claves ni tokens.
-- [ ] `formularioUrl` es el link público del formulario, no el link de edición ni el de resultados.
+- [ ] El Excel de respuestas está compartido **solo con los organizadores**, nunca con "cualquier persona con el vínculo".
+- [ ] **Nunca** se suben al repositorio exportaciones del Excel (CSV/XLSX), capturas de respuestas, claves ni tokens.
+- [ ] `FLUJO_URL` contiene solo la URL "HTTP POST" del flujo. Si recibe spam, sigue la nota del paso 6 de GUIA_POWER_AUTOMATE.md.
 - [ ] Antes de enviar el afiche, revisa que la página publicada no tenga datos personales.
 
 **Si se sube algo sensible por error:**
@@ -78,7 +81,7 @@ Prueba el QR con 2 o 3 celulares distintos antes de enviar el afiche. Incluye ta
 
 ## 4. Después del evento
 
-1. Las respuestas viven en el formulario de la empresa: su manejo y borrado siguen las políticas de la empresa.
+1. Desactiva o elimina el flujo de Power Automate, y **borra el Excel** de respuestas (ver GUIA_POWER_AUTOMATE.md, paso 9).
 2. En GitHub: desactiva Pages (*Settings → Pages → Unpublish site*) y **archiva** el repositorio (*Settings → Archive this repository*) o bórralo.
 
 ---

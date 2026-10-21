@@ -113,15 +113,171 @@
     reveals.forEach(function (el) { el.classList.add("is-visible"); });
   }
 
-  /* ---------- Confirmación (formulario externo) ---------- */
-  var formLink = $("#form-link");
-  if (Date.now() > DEADLINE) {
-    formLink.hidden = true;
-    $("#rsvp-closed").hidden = false;
-  } else if (/^https:\/\//.test(CONFIG.formularioUrl)) {
-    formLink.href = CONFIG.formularioUrl;
-  } else {
-    formLink.hidden = true;
-    console.warn("[Invitación] Falta formularioUrl en js/config.js: el botón de confirmación está oculto.");
+  /* ---------- Formulario de confirmación ---------- */
+  var form = $("#rsvp");
+  var closed = $("#rsvp-closed");
+  var done = $("#rsvp-done");
+  var status = $("#form-status");
+  var submit = $("#submit");
+  var ifAttend = $("#if-attend");
+  var ifAllergy = $("#if-allergy");
+
+  function closeForm() {
+    form.hidden = true;
+    closed.hidden = false;
   }
+  if (Date.now() > DEADLINE) closeForm();
+
+  // Muestra/oculta un bloque y desactiva sus campos para que no se validen ni envíen.
+  function toggle(block, show) {
+    block.hidden = !show;
+    block.querySelectorAll("input, textarea").forEach(function (el) { el.disabled = !show; });
+  }
+  function value(name) {
+    var el = form.querySelector('[name="' + name + '"]:checked');
+    return el ? el.value : "";
+  }
+  function sync() {
+    var attends = value("asistencia") === "Sí";
+    toggle(ifAttend, attends);
+    toggle(ifAllergy, attends && value("alergia") === "Sí");
+  }
+  form.addEventListener("change", sync);
+  sync();
+
+  // Mismas reglas que la condición del flujo de Power Automate (GUIA_POWER_AUTOMATE.md).
+  // El flujo no tiene expresiones regulares: allí solo se revisan largos y que no empiecen con = + - @.
+  var NAME_RE = /^[\p{L}\p{M}' ’-]+$/u;
+  var FORMULA_RE = /^[=+\-@]/;
+
+  // Si el distrito escrito coincide con uno de la lista (sin importar tildes ni mayúsculas), se guarda tal como figura en ella.
+  function plain(s) { return s.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase(); }
+  var DISTRICTS = Array.prototype.map.call($("#distritos").options, function (o) { return o.value; });
+  function district(s) {
+    s = s.replace(/\s+/g, " ").trim();
+    return DISTRICTS.find(function (x) { return plain(x) === plain(s); }) || s;
+  }
+
+  function setError(key, msg) {
+    var err = $("#" + key + "-err");
+    var targets = form.querySelectorAll('[name="' + key + '"]');
+    err.textContent = msg || "";
+    err.hidden = !msg;
+    targets.forEach(function (el) {
+      if (msg) el.setAttribute("aria-invalid", "true");
+      else el.removeAttribute("aria-invalid");
+    });
+  }
+
+  function collect() {
+    return {
+      nombre: form.nombre.value.replace(/\s+/g, " ").trim(),
+      asistencia: value("asistencia"),
+      distrito: district(form.distrito.value),
+      vehiculo: value("vehiculo"),
+      alergia: value("alergia"),
+      alergiaDetalle: form.alergiaDetalle.value.trim(),
+      acepta: form.acepta.checked ? "Sí" : "",
+      website: form.website.value
+    };
+  }
+
+  function validate(d) {
+    var errors = {};
+    if (!d.nombre) errors.nombre = "Escribe tus nombres y apellidos.";
+    else if (d.nombre.length < 3 || d.nombre.length > 100) errors.nombre = "Debe tener entre 3 y 100 caracteres.";
+    else if (!NAME_RE.test(d.nombre) || !/\p{L}/u.test(d.nombre)) errors.nombre = "Usa solo letras, espacios, apóstrofo (') o guion (-).";
+
+    if (d.asistencia !== "Sí" && d.asistencia !== "No") errors.asistencia = "Indica si asistirás al evento.";
+    if (d.asistencia === "Sí") {
+      if (!d.distrito) errors.distrito = "Indica tu distrito de residencia.";
+      else if (d.distrito.length < 2 || d.distrito.length > 60) errors.distrito = "Debe tener entre 2 y 60 caracteres.";
+      else if (!NAME_RE.test(d.distrito) || !/\p{L}/u.test(d.distrito)) errors.distrito = "Usa solo letras, espacios, apóstrofo (') o guion (-).";
+      if (d.vehiculo !== "Sí" && d.vehiculo !== "No") errors.vehiculo = "Indica si vendrás con vehículo propio.";
+      if (d.alergia !== "Sí" && d.alergia !== "No") errors.alergia = "Indica si tienes alguna alergia alimentaria.";
+      if (d.alergia === "Sí") {
+        if (!d.alergiaDetalle) errors.alergiaDetalle = "Cuéntanos a qué alimentos eres alérgico.";
+        else if (d.alergiaDetalle.length > 300) errors.alergiaDetalle = "Máximo 300 caracteres.";
+        else if (FORMULA_RE.test(d.alergiaDetalle)) errors.alergiaDetalle = "No empieces con =, +, - ni @.";
+      }
+    }
+    if (d.acepta !== "Sí") errors.acepta = "Debes aceptar el uso de datos para enviar tu confirmación.";
+
+    ["nombre", "asistencia", "distrito", "vehiculo", "alergia", "alergiaDetalle", "acepta"].forEach(function (k) {
+      setError(k, errors[k]);
+    });
+    return Object.keys(errors);
+  }
+
+  function send(d) {
+    // Campos que no aplican se envían vacíos.
+    if (d.asistencia !== "Sí") { d.distrito = ""; d.vehiculo = ""; d.alergia = ""; }
+    if (d.alergia !== "Sí") d.alergiaDetalle = "";
+
+    if (!CONFIG.FLUJO_URL) {
+      console.warn("[Invitación] MODO DEMO: FLUJO_URL está vacío; no se guardó nada.", d);
+      return new Promise(function (resolve) { setTimeout(function () { resolve({ ok: true }); }, 700); });
+    }
+    var ctrl = new AbortController();
+    var t = setTimeout(function () { ctrl.abort(); }, 60000);
+    // application/x-www-form-urlencoded => petición "simple", sin preflight CORS (el flujo no responde a OPTIONS).
+    // encodeURIComponent (espacios como %20, no "+") para que el flujo lea bien cada valor.
+    var body = Object.keys(d).map(function (k) { return encodeURIComponent(k) + "=" + encodeURIComponent(d[k]); }).join("&");
+    return fetch(CONFIG.FLUJO_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: body,
+      signal: ctrl.signal,
+      credentials: "omit"
+    }).then(function (r) {
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      return r.json();
+    }).finally(function () { clearTimeout(t); });
+  }
+
+  var sending = false;
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    if (sending) return;
+    if (Date.now() > DEADLINE) { closeForm(); return; }
+
+    status.textContent = "";
+    status.classList.remove("is-error");
+    var d = collect();
+    var bad = validate(d);
+    if (bad.length) {
+      var first = form.querySelector('[name="' + bad[0] + '"]');
+      if (first) first.focus();
+      status.textContent = "Revisa los campos marcados.";
+      status.classList.add("is-error");
+      return;
+    }
+
+    sending = true;
+    submit.disabled = true;
+    submit.textContent = "Enviando…";
+    status.textContent = "Enviando tu confirmación…";
+
+    send(d).then(function (res) {
+      if (res && res.ok) {
+        $("#rsvp-done-text").textContent = d.asistencia === "Sí"
+          ? "Recibimos tu confirmación. ¡Nos vemos el " + fmt.fecha.toLowerCase() + "!"
+          : "Gracias por avisarnos. Te extrañaremos en esta celebración.";
+        form.hidden = true;
+        done.hidden = false;
+        done.focus();
+        return;
+      }
+      if (res && res.error === "plazo_cerrado") { closeForm(); return; }
+      throw new Error((res && res.error) || "respuesta_invalida");
+    }).catch(function (err) {
+      console.error("[Invitación] Error al enviar:", err);
+      status.textContent = "No pudimos enviar tu confirmación. Revisa tu conexión e inténtalo de nuevo.";
+      status.classList.add("is-error");
+    }).finally(function () {
+      sending = false;
+      submit.disabled = false;
+      submit.textContent = "Enviar confirmación";
+    });
+  });
 })();
